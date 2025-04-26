@@ -38,7 +38,7 @@ const ContactPage: React.FC = () => {
       
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-16">
+        <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">Get in Touch</h1>
             <p className="text-xl text-center max-w-3xl mx-auto text-blue-100">
@@ -51,7 +51,6 @@ const ContactPage: React.FC = () => {
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {/* Contact Information */}
               <div className="space-y-8">
                 <Card>
                   <CardContent className="p-8">

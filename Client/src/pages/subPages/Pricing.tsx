@@ -13,7 +13,7 @@ const Pricing: React.FC = () => {
       
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-16">
+        <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">Simple, Transparent Pricing</h1>
             <p className="text-xl text-center max-w-3xl mx-auto text-blue-100">

@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Book, Mail, Lock, EyeOff, Eye, ArrowLeft } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,12 +25,14 @@ const LoginPage: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // For demo purposes: simple validation
-      if (email === 'demo@example.com' && password === 'password') {
+      if (email === 'demo@example.com' && password === 'password1122') {
+        login();
         navigate('/dashboard');
       } else {
         setError('Invalid email or password');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('An error occurred during login');
     } finally {
       setLoading(false);

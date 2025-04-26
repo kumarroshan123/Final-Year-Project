@@ -66,7 +66,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                   Predictions
                 </Link>
                 <Link to="/upload" className="text-gray-700 hover:text-blue-800 px-3 py-2 text-sm font-medium">
-                  Upload Khata
+                  Upload File
                 </Link>
 
                 <div className="relative ml-3">
@@ -196,7 +196,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                 >
                   <div className="flex items-center">
                     <Book className="h-5 w-5 mr-2" />
-                    Upload Khata
+                    Upload File
                   </div>
                 </Link>
                 <Link 

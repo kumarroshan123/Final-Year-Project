@@ -7,7 +7,8 @@ const PrivacyPolicyPage: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
-      <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-16">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">Privacy Policy</h1>
             

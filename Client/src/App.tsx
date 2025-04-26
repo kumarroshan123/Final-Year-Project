@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import ScrollToTop from './components/utils/ScrollToTop';
+import Chatbot from './components/chatbot/Chatbot';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -11,12 +13,14 @@ import Pricing from './pages/subPages/Pricing';
 import FAQPage from './pages/subPages/Faqs';
 import PrivacyPolicyPage from './pages/subPages/PrivacyPolicyPage';
 import BlogPage from './pages/subPages/BlogPage';
-import AnalyticsPage from './pages/subPages/AnalyticsPage';
-import PredictionsPage from './pages/subPages/PredictionsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import PredictionsPage from './pages/PredictionsPage';
+import DashboardPage from './pages/DashboardPage';
+import FileUploader from './components/file_upload/FileUploader';
+import DemoPage from './pages/subPages/DemoPage';
 
 function App() {
-  // This would typically come from your authentication context
-  const isAuthenticated = false;
+  const { isAuthenticated } = useAuth();
 
   return (
     <Router>
@@ -26,6 +30,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} /> 
         <Route path="/contact" element={<ContactPage />} /> 
         <Route path="/pricing" element={<Pricing />} /> 
+        <Route path='/demo' element={<DemoPage />} />
         <Route path='/faq' element={<FAQPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/blog" element={<BlogPage />} />
@@ -47,15 +52,28 @@ function App() {
           path="/predictions" 
           element={isAuthenticated ? <PredictionsPage /> : <Navigate to="/login" />} 
         />
+        <Route 
+          path="/dashboard" 
+          element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/upload" 
+          element={isAuthenticated ? <FileUploader /> : <Navigate to="/login" />} 
+        />
+
         
         {/* For demo purposes, also allow direct access */}
         <Route path="/demo/profile" element={<ProfilePage />} />
         <Route path="/demo/analytics" element={<AnalyticsPage />} />
         <Route path="/demo/predictions" element={<PredictionsPage />} />
+        <Route path="/demo/dashboard" element={<DashboardPage />} />
+        <Route path="/demo/upload" element={<FileUploader />} />
+
         
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <Chatbot />
     </Router>
   );
 }

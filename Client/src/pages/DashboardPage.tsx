@@ -21,6 +21,7 @@ const DashboardPage: React.FC = () => {
   // Mock user data for Navbar (replace with actual auth context later)
   const mockUser = {
     name: 'Vikram Sharma',
+    shopName: 'Vikram\'s General Store'
   };
 
   // Mock data for analytics summary
@@ -74,11 +75,15 @@ const DashboardPage: React.FC = () => {
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center flex items-center justify-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-2 text-center flex items-center justify-center">
             Dashboard
             </h1>
+            
             <p className="text-xl text-center max-w-3xl mx-auto text-blue-100">
               Dive deep into your business performance metrics.
+            </p>
+            <p className="text-xl text-center mt-4">
+              {mockUser.shopName}
             </p>
           </div>
         </section>
@@ -87,7 +92,7 @@ const DashboardPage: React.FC = () => {
         <div className='flex flex-col min-h-screen bg-gray-50'>
           {/* Analytics Overview */}
           <Card className="col-span-1">
-            <CardHeader className="flex flex-row justify-between items-center">
+            <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
               <div>
                 <CardTitle className="flex items-center">
                   <BarChart2 className="h-5 w-5 mr-2 text-blue-800" />
@@ -95,8 +100,8 @@ const DashboardPage: React.FC = () => {
                 </CardTitle>
                 <p className="text-gray-500 text-sm mt-1">Last 30 days performance</p>
               </div>
-              <Link to="/analytics">
-                <Button variant="outline" size="sm">
+              <Link to="/analytics" className="w-full md:w-auto">
+                <Button variant="outline" size="sm" className="w-full md:w-auto">
                 View Detailed Analytics
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
@@ -181,7 +186,7 @@ const DashboardPage: React.FC = () => {
 
           {/* Predictive Analysis */}
           <Card className="col-span-1">
-            <CardHeader className="flex flex-row justify-between items-center">
+            <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
               <div>
                 <CardTitle className="flex items-center">
                   <TrendingUp className="h-5 w-5 mr-2 text-emerald-600" />
@@ -189,8 +194,8 @@ const DashboardPage: React.FC = () => {
                 </CardTitle>
                 <p className="text-gray-500 text-sm mt-1">Next 30 days forecast</p>
               </div>
-              <Link to="/predictions">
-                <Button variant="outline" size="sm">
+              <Link to="/predictions" className="w-full md:w-auto">
+                <Button variant="outline" size="sm" className="w-full md:w-auto">
                   View Predictive Analysis
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>

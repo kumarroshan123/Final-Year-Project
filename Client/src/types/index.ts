@@ -16,6 +16,8 @@ export interface Shop {
   establishedYear: number;
   description: string;
   logo?: string;
+  gstNumber?: string;
+  averageMonthlyRevenue?: number;
 }
 
 export interface AnalyticsSummary {

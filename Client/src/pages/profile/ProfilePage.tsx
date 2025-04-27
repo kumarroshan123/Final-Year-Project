@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit2 } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -11,21 +11,38 @@ import { Shop } from '../../types';
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   
-  // Mock data for shop profile
-  const [shop, setShop] = useState<Shop>({
+  // Initial mock data (used if nothing in local storage)
+  const initialShopData: Shop = {
     id: '1',
-    name: 'Sharma General Store',
+    name: 'Vikram\'s General Store',
     owner: 'Vikram Sharma',
     address: '123 Market Street, New Delhi, 110001',
     phone: '+91 98765 43210',
     email: 'sharma.store@example.com',
     businessType: 'Retail',
     establishedYear: 2005,
-    description: 'A family-owned general store serving the local community with groceries, household items, and daily essentials.'
+    description: 'A family-owned general store serving the local community with groceries, household items, and daily essentials.',
+    gstNumber: 'GSTIN1234567890',
+    averageMonthlyRevenue: 50000
+  };
+
+  // State to hold shop data, initialized from local storage or mock data
+  const [shop, setShop] = useState<Shop>(() => {
+    const savedShopData = localStorage.getItem('shopProfile');
+    return savedShopData ? JSON.parse(savedShopData) : initialShopData;
   });
+
+  // Effect to save initial data to local storage if it wasn't there
+  useEffect(() => {
+    if (!localStorage.getItem('shopProfile')) {
+      localStorage.setItem('shopProfile', JSON.stringify(initialShopData));
+    }
+  }, []); 
   
   const handleSaveProfile = () => {
     // In a real app, this would call an API to update the profile
+    // Save the updated shop data to local storage
+    localStorage.setItem('shopProfile', JSON.stringify(shop));
     setIsEditing(false);
   };
   
@@ -134,6 +151,26 @@ const ProfilePage: React.FC = () => {
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">GST Number</label>
+                    <input
+                      type="text"
+                      name="gstNumber"
+                      value={shop.gstNumber || ''}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Avg. Monthly Revenue (INR)</label>
+                    <input
+                      type="number"
+                      name="averageMonthlyRevenue"
+                      value={shop.averageMonthlyRevenue || ''}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input
@@ -188,6 +225,18 @@ const ProfilePage: React.FC = () => {
                       <div>
                         <p className="text-sm font-medium text-gray-500">Established</p>
                         <p className="mt-1">{shop.establishedYear}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">GST Number</p>
+                        <p className="mt-1">{shop.gstNumber || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Avg. Monthly Revenue</p>
+                        <p className="mt-1">
+                          {shop.averageMonthlyRevenue 
+                            ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(shop.averageMonthlyRevenue) 
+                            : 'N/A'}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Description</p>

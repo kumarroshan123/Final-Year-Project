@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, BarChart2, Settings, Home, LogOut, User, Book } from 'lucide-react';
+import { Menu, X, BarChart2, Home, LogOut, User, Book } from 'lucide-react';
 import Button from '../ui/Button';
 import Avatar from '../ui/Avatar';
 
@@ -90,14 +90,14 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                         <User className="h-4 w-4 mr-2" />
                         Profile
                       </Link>
-                      <Link 
+                      {/* <Link 
                         to="/settings" 
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                         onClick={() => setIsProfileOpen(false)}
                       >
                         <Settings className="h-4 w-4 mr-2" />
                         Settings
-                      </Link>
+                      </Link> */}
                       <Link 
                         to="/logout" 
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
@@ -209,7 +209,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                     Profile
                   </div>
                 </Link>
-                <Link 
+                {/* <Link 
                   to="/settings" 
                   className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-800"
                   onClick={() => setIsMenuOpen(false)}
@@ -218,7 +218,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                     <Settings className="h-5 w-5 mr-2" />
                     Settings
                   </div>
-                </Link>
+                </Link> */}
                 <Link 
                   to="/logout" 
                   className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-800"

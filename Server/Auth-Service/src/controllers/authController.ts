@@ -101,3 +101,79 @@ export const login:AsyncHandler = async (req,res,next) => {
     return res.status(500).json({ status: 'error', message: 'An error occurred during login.' });
   }
 };
+
+// ... existing code ...
+
+// Get current user profile
+export const getMe: AsyncHandler = async (req, res, next) => {
+    const user = (req as any).user;
+    if (!user) {
+      return res.status(404).json({ status: 'fail', message: 'User not found' });
+    }
+    const userOutput = { ...user.toJSON() };
+    delete userOutput.password;
+    res.status(200).json({
+      status: 'success',
+      data: { user: userOutput },
+    });
+  };
+  
+  // Update current user profile (except password)
+  // ... existing code ...
+
+export const updateMe: AsyncHandler = async (req, res, next) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(404).json({ status: 'fail', message: 'User not found' });
+      }
+  
+      // List of fields that can be updated
+      const updatableFields = [
+        'name',
+        'email',
+        'storeName',
+        'businessType',
+        'gstNumber',
+        'address',
+        'description',
+        'phoneNumber',
+        'establishedYear',
+        'avgMonthlyRevenue'
+      ];
+  
+      let updated = false;
+      updatableFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          user[field] = req.body[field];
+          updated = true;
+        }
+      });
+  
+      if (!updated) {
+        return res.status(400).json({ status: 'fail', message: 'No valid fields provided for update.' });
+      }
+  
+      await user.save();
+  
+      const userOutput = { ...user.toJSON() };
+      delete userOutput.password;
+  
+      res.status(200).json({
+        status: 'success',
+        data: { user: userOutput },
+      });
+    } catch (error) {
+      console.error("Update Profile Error:", error);
+      res.status(500).json({ status: 'error', message: 'An error occurred while updating profile.' });
+    }
+  };
+  // ... existing code ...
+  
+  // Logout user (clear cookie)
+  export const logout: AsyncHandler = async (req, res, next) => {
+    res.clearCookie('jwt');
+    res.status(200).json({ status: 'success', message: 'Logged out successfully' });
+  };
+  
+  // ... existing code ...

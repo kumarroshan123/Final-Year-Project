@@ -2,8 +2,8 @@ APIs for LedgerSense
 
 1. Auth APIs
 
- 	POST	http://localhost:5000/api/auth/register	->Create new User
-	POST	http://localhost:5000/api/auth/login	->Log-in User
+ 	POST	http://localhost:5001/api/auth/register	->Create new User
+	POST	http://localhost:5001/api/auth/login	->Log-in User
 	GET		http://localhost:5000/api/auth/me		->Get User details
 	PATCH	http://localhost:5000/api/users/me		->Update User details
 	POST	http://localhost:5000/api/users/logout	->Logout user

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
-import { JWT_SECRET, JWT_EXPIRES_IN } from '../config';
+import { JWT_SECRET } from '../config';
 
 
 if (!JWT_SECRET) {
@@ -21,8 +21,8 @@ export const signToken = (id: number): string => {
     // This check is redundant if the above check exits the process, but good for safety
     throw new Error('JWT_SECRET is not defined. Cannot sign token.');
   }
-  const token = jwt.sign({ id }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
+  const token = jwt.sign({id},JWT_SECRET,{
+    expiresIn:'1h'
   });
   return token;
 };

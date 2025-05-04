@@ -1,10 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { RequestHandler ,Request, Response, NextFunction } from 'express';
 import db from '../../models'; 
 import { signToken } from '../utils/jwtUtils'; 
 import bcrypt from 'bcryptjs'; 
 
 const User = (db as any).User;
 
+type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<any>;
 // Utility function to send token response (ensure JWT_SECRET is in your .env)
 const createSendToken = (user: any, statusCode: number, res: Response) => {
   // Ensure user.id exists and is a number before signing
@@ -23,14 +24,11 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
     secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
   };
 
-  res.cookie('jwt', token, cookieOptions);
-
   // Remove password from output
   const userOutput = { ...user.toJSON() }; // Clone user data
   delete userOutput.password;
 
-
-  res.status(statusCode).json({
+  return res.cookie('jwt', token, cookieOptions).status(statusCode).json({
     status: 'success',
     token,
     data: {
@@ -39,9 +37,8 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
   });
 };
 
-
 // Register User Controller
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+export const register:AsyncHandler = async (req,res,next)  => {
   try {
     const { name, email, password } = req.body;
 
@@ -49,9 +46,9 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     if (!name || !email || !password) {
       return res.status(400).json({ status: 'fail', message: 'Please provide name, email, and password' });
     }
-     if (password.length < 8) {
-       return res.status(400).json({ status: 'fail', message: 'Password must be at least 8 characters long' });
-     }
+    if (password.length < 8) {
+      return res.status(400).json({ status: 'fail', message: 'Password must be at least 8 characters long' });
+    }
 
     // Create new user (password hashing is handled by the model hook)
     const newUser = await User.create({
@@ -64,21 +61,21 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     createSendToken(newUser, 201, res);
 
   } catch (error: any) {
-     // Handle potential errors (like duplicate email)
-     if (error.name === 'SequelizeUniqueConstraintError') {
-        return res.status(400).json({ status: 'fail', message: 'Email address already in use.' });
-     }
-     if (error.name === 'SequelizeValidationError') {
-        const messages = error.errors.map((err: any) => err.message);
-        return res.status(400).json({ status: 'fail', message: messages.join(', ') });
-     }
-     console.error("Registration Error:", error);
-     res.status(500).json({ status: 'error', message: 'An error occurred during registration.' });
+    // Handle potential errors (like duplicate email)
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ status: 'fail', message: 'Email address already in use.' });
+    }
+    if (error.name === 'SequelizeValidationError') {
+      const messages = error.errors.map((err: any) => err.message);
+      return res.status(400).json({ status: 'fail', message: messages.join(', ') });
+    }
+    console.error("Registration Error:", error);
+    return res.status(500).json({ status: 'error', message: 'An error occurred during registration.' });
   }
 };
 
 // Login User Controller
-export const login = async (req: Request, res: Response, next: NextFunction) => {
+export const login:AsyncHandler = async (req,res,next) => {
   try {
     const { email, password } = req.body;
 
@@ -93,7 +90,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     // 3) Check user existence and password validity using bcrypt.compare
     if (!user || !(await bcrypt.compare(password, user.password))) { // Compare plain text password with hash
-       return res.status(401).json({ status: 'fail', message: 'Incorrect email or password' });
+      return res.status(401).json({ status: 'fail', message: 'Incorrect email or password' });
     }
 
     // 4) If everything ok, send token to client
@@ -101,6 +98,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
   } catch (error) {
     console.error("Login Error:", error);
-    res.status(500).json({ status: 'error', message: 'An error occurred during login.' });
+    return res.status(500).json({ status: 'error', message: 'An error occurred during login.' });
   }
 };

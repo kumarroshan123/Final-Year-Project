@@ -3,7 +3,7 @@ dotenv.config();
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { sequelize } from '../models';
-
+import authRoutes from './routes/authRoutes';
 
 const app: Express = express();
 const port = process.env.PORT || 5001;
@@ -12,6 +12,7 @@ const port = process.env.PORT || 5001;
 app.use(cors()); // Enable CORS (configure origins for production)
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use('/api/auth', authRoutes);
 
 // Test Database Connection using the imported sequelize instance
 const checkDbConnection = async () => {

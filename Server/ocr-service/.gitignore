@@ -1,0 +1,6 @@
+ocr_service
+.ocr_service
+*.pyc
+__pycache__/
+*.pyo\
+*.log

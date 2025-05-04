@@ -6,6 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  onRightIconClick?: () => void; 
 }
 
 const Input: React.FC<InputProps> = ({
@@ -14,12 +15,13 @@ const Input: React.FC<InputProps> = ({
   error,
   leftIcon,
   rightIcon,
+  onRightIconClick,
   className = '',
   id,
   ...props
 }) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   return (
     <div className="mb-4">
       {label && (
@@ -46,7 +48,13 @@ const Input: React.FC<InputProps> = ({
           {...props}
         />
         {rightIcon && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
+         
+          <div
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 cursor-pointer"
+            onClick={onRightIconClick} 
+            role="button" 
+            aria-label="Toggle password visibility"
+          >
             {rightIcon}
           </div>
         )}

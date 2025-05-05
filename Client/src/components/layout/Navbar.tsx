@@ -3,19 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, BarChart2, Home, LogOut, User, Book } from 'lucide-react';
 import Button from '../ui/Button';
 import Avatar from '../ui/Avatar';
+import { useAuth } from '../../context/AuthContext';
 
-interface NavbarProps {
-  user?: {
-    name: string;
-    avatar?: string;
-  };
-}
-
-const Navbar: React.FC<NavbarProps> = ({ user }) => {
+const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -39,6 +34,13 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setIsProfileOpen(false);
+    setIsMenuOpen(false);
+    navigate('/');
+  };
+
   return (
     <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,7 +56,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
+            {isAuthenticated && user ? (
               <>
                 <Link to="/dashboard" className="text-gray-700 hover:text-blue-800 px-3 py-2 text-sm font-medium">
                   Dashboard
@@ -99,9 +101,9 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                         Settings
                       </Link> */}
                       <Link 
-                        to="/logout" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                        onClick={() => setIsProfileOpen(false)}
+                        to="#" 
+                        className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                        onClick={handleLogout}
                       >
                         <LogOut className="h-4 w-4 mr-2" />
                         Sign out
@@ -157,7 +159,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="pt-2 pb-3 space-y-1">
-            {user ? (
+            {isAuthenticated && user ? (
               <>
                 <Link 
                   to="/dashboard" 
@@ -220,9 +222,9 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                   </div>
                 </Link> */}
                 <Link 
-                  to="/logout" 
+                  to="#" 
                   className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-800"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={handleLogout}
                 >
                   <div className="flex items-center">
                     <LogOut className="h-5 w-5 mr-2" />

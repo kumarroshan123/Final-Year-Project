@@ -3,6 +3,14 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  storeName?: string;
+  phoneNumber?: string;
+  businessType?: string;
+  gstNumber?: string;
+  address?: string;
+  description?: string;
+  establishedYear?: number;
+  avgMonthlyRevenue?: number;
 }
 
 export interface Shop {

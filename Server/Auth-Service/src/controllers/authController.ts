@@ -21,7 +21,9 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
       Date.now() + (parseInt(process.env.JWT_COOKIE_EXPIRES_IN || '90', 10) * 24 * 60 * 60 * 1000) // Default 90 days
     ),
     httpOnly: true, // Prevent XSS attacks
+    sameSite: 'lax' as const, // <-- Add this for cross-origin cookie support
     secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+    path: '/', // Ensure cookie is valid for all routes
   };
 
   // Remove password from output
@@ -172,7 +174,7 @@ export const updateMe: AsyncHandler = async (req, res, next) => {
   
   // Logout user (clear cookie)
   export const logout: AsyncHandler = async (req, res, next) => {
-    res.clearCookie('jwt');
+    res.clearCookie('jwt', { path: '/' }); // Ensure path matches cookie set
     res.status(200).json({ status: 'success', message: 'Logged out successfully' });
   };
   

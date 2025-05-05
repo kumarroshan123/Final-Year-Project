@@ -41,10 +41,7 @@ const inventoryPerformanceData: InventoryItem[] = [
 
 
 const AnalyticsPage: React.FC = () => {
-  // Mock user data for Navbar (replace with actual auth context later)
-  const mockUser = {
-    name: 'Vikram Sharma',
-  };
+  
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -56,7 +53,7 @@ const AnalyticsPage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar user={mockUser} />
+      <Navbar  />
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">

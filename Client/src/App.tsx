@@ -20,7 +20,16 @@ import FileUploader from './components/file_upload/FileUploader';
 import DemoPage from './pages/subPages/DemoPage';
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-16 h-16 border-4 border-blue-300 border-t-blue-800 rounded-full animate-spin" />
+        <span className="sr-only">Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <Router>

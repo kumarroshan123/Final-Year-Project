@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Book, Mail, Lock, User, EyeOff, Eye, ArrowLeft } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { useAuth } from '../../context/AuthContext';
 
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -27,11 +29,14 @@ const SignupPage: React.FC = () => {
     
     // Simulate API call
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await register(name, email, password);
       navigate('/dashboard');
-    } catch (err) {
-      setError('An error occurred during registration');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'An error occurred during registration');
+      } else {
+        setError('An error occurred during registration');
+      }
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Edit2 } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -7,54 +7,90 @@ import Button from '../../components/ui/Button';
 import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
 import { Shop } from '../../types';
+import { useAuth } from '../../context/AuthContext';
+import * as authApi from '../../utils/authApi';
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   
-  // Initial mock data (used if nothing in local storage)
-  const initialShopData: Shop = {
-    id: '1',
-    name: 'Vikram\'s General Store',
-    owner: 'Vikram Sharma',
-    address: '123 Market Street, New Delhi, 110001',
-    phone: '+91 98765 43210',
-    email: 'sharma.store@example.com',
-    businessType: 'Retail',
-    establishedYear: 2005,
-    description: 'A family-owned general store serving the local community with groceries, household items, and daily essentials.',
-    gstNumber: 'GSTIN1234567890',
-    averageMonthlyRevenue: 50000
-  };
-
-  // State to hold shop data, initialized from local storage or mock data
-  const [shop, setShop] = useState<Shop>(() => {
+  const { user, refreshUser } = useAuth();
+  const [shop, setShop] = useState<Shop | null>(() => {
     const savedShopData = localStorage.getItem('shopProfile');
-    return savedShopData ? JSON.parse(savedShopData) : initialShopData;
-  });
-
-  // Effect to save initial data to local storage if it wasn't there
-  useEffect(() => {
-    if (!localStorage.getItem('shopProfile')) {
-      localStorage.setItem('shopProfile', JSON.stringify(initialShopData));
+    if (savedShopData) {
+      return JSON.parse(savedShopData);
+    } else if (user) {
+      return {
+        id: user.id,
+        owner: user.name, // User's name from signup
+        storeName: '',    // Let user type store name
+        address: '',
+        phone: '',
+        email: user.email, // Autofill email from user
+        businessType: '',
+        establishedYear: new Date().getFullYear(),
+        description: '',
+        logo: '',
+        gstNumber: '',
+        averageMonthlyRevenue: undefined,
+      };
     }
-  }, []); 
+    return null;
+  });
   
-  const handleSaveProfile = () => {
-    // In a real app, this would call an API to update the profile
-    // Save the updated shop data to local storage
-    localStorage.setItem('shopProfile', JSON.stringify(shop));
-    setIsEditing(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  const handleSaveProfile = async () => {
+    setUpdateLoading(true);
+    setUpdateError(null);
+    try {
+      // Prepare payload for API (only updatable fields)
+      const payload = {
+        name: shop?.name,
+        email: shop?.email,
+        storeName: shop?.name,
+        businessType: shop?.businessType,
+        gstNumber: shop?.gstNumber,
+        address: shop?.address,
+        description: shop?.description,
+        phoneNumber: shop?.phone,
+        establishedYear: shop?.establishedYear,
+        avgMonthlyRevenue: shop?.averageMonthlyRevenue,
+      };
+      await authApi.updateMe(payload);
+      await refreshUser();
+      setIsEditing(false);
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
+      setUpdateError(errorMessage);
+    } finally {
+      setUpdateLoading(false);
+    }
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setShop(prev => ({ ...prev, [name]: value }));
+    setShop(prev => {
+      if (!prev) return null;
+      return { ...prev, [name]: value } as Shop;
+    });
   };
   
+  if (!shop && !user) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-center text-gray-500">No profile details found. Please update your profile.</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
  
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar user={{ name: shop.owner }} />
+      <Navbar />
       
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 gap-8">
@@ -64,12 +100,15 @@ const ProfilePage: React.FC = () => {
               <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
                 <Avatar 
                   size="xl" 
-                  name={shop.name} 
+                  name={shop?.owner} 
                   className="mb-4 md:mb-0 md:mr-6" 
                 />
                 <div>
-                  <CardTitle className="text-2xl">{shop.name}</CardTitle>
-                  <p className="text-gray-600">{shop.businessType} • Est. {shop.establishedYear}</p>
+                  <CardTitle className="text-2xl">{shop?.owner}</CardTitle>
+                  {shop?.storeName && (
+                    <div className="text-lg text-gray-700 font-semibold mt-1">{shop.storeName}</div>
+                  )}
+                  <p className="text-gray-600">{shop?.businessType} • Est. {shop?.establishedYear}</p>
                   <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
                     <Badge variant="info">Verified</Badge>
                     <Badge variant="success">Active</Badge>
@@ -78,7 +117,7 @@ const ProfilePage: React.FC = () => {
               </div>
               <div className="mt-4 md:mt-0">
                 {isEditing ? (
-                  <Button onClick={handleSaveProfile}>
+                  <Button onClick={handleSaveProfile} isLoading={updateLoading}>
                     Save Changes
                   </Button>
                 ) : (
@@ -89,24 +128,27 @@ const ProfilePage: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
+              {isEditing && updateError && (
+                <div className="mb-4 bg-red-50 text-red-800 p-2 rounded-md">{updateError}</div>
+              )}
               {isEditing ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
                     <input
                       type="text"
-                      name="name"
-                      value={shop.name}
+                      name="owner"
+                      value={shop?.owner}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
                     <input
                       type="text"
-                      name="owner"
-                      value={shop.owner}
+                      name="storeName"
+                      value={shop?.storeName}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -116,9 +158,10 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="email"
                       name="email"
-                      value={shop.email}
+                      value={shop?.email}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      autoComplete="email"
                     />
                   </div>
                   <div>
@@ -126,7 +169,7 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="tel"
                       name="phone"
-                      value={shop.phone}
+                      value={shop?.phone}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -136,7 +179,7 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="text"
                       name="businessType"
-                      value={shop.businessType}
+                      value={shop?.businessType}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -146,7 +189,7 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="number"
                       name="establishedYear"
-                      value={shop.establishedYear}
+                      value={shop?.establishedYear}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -156,7 +199,7 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="text"
                       name="gstNumber"
-                      value={shop.gstNumber || ''}
+                      value={shop?.gstNumber || ''}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -166,7 +209,7 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="number"
                       name="averageMonthlyRevenue"
-                      value={shop.averageMonthlyRevenue || ''}
+                      value={shop?.averageMonthlyRevenue || ''}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -176,7 +219,7 @@ const ProfilePage: React.FC = () => {
                     <input
                       type="text"
                       name="address"
-                      value={shop.address}
+                      value={shop?.address}
                       onChange={handleInputChange}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -185,7 +228,7 @@ const ProfilePage: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                     <textarea
                       name="description"
-                      value={shop.description}
+                      value={shop?.description}
                       onChange={handleInputChange}
                       rows={4}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -198,20 +241,16 @@ const ProfilePage: React.FC = () => {
                     <h3 className="text-lg font-medium text-gray-900 mb-3">Contact Information</h3>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Owner</p>
-                        <p className="mt-1">{shop.owner}</p>
-                      </div>
-                      <div>
                         <p className="text-sm font-medium text-gray-500">Email</p>
-                        <p className="mt-1">{shop.email}</p>
+                        <p className="mt-1">{shop?.email}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Phone</p>
-                        <p className="mt-1">{shop.phone}</p>
+                        <p className="mt-1">{shop?.phone}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Address</p>
-                        <p className="mt-1">{shop.address}</p>
+                        <p className="mt-1">{shop?.address}</p>
                       </div>
                     </div>
                   </div>
@@ -220,27 +259,27 @@ const ProfilePage: React.FC = () => {
                     <div className="space-y-3">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Business Type</p>
-                        <p className="mt-1">{shop.businessType}</p>
+                        <p className="mt-1">{shop?.businessType}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Established</p>
-                        <p className="mt-1">{shop.establishedYear}</p>
+                        <p className="mt-1">{shop?.establishedYear}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">GST Number</p>
-                        <p className="mt-1">{shop.gstNumber || 'N/A'}</p>
+                        <p className="mt-1">{shop?.gstNumber || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Avg. Monthly Revenue</p>
                         <p className="mt-1">
-                          {shop.averageMonthlyRevenue 
-                            ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(shop.averageMonthlyRevenue) 
+                          {shop?.averageMonthlyRevenue 
+                            ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(shop?.averageMonthlyRevenue) 
                             : 'N/A'}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Description</p>
-                        <p className="mt-1">{shop.description}</p>
+                        <p className="mt-1">{shop?.description}</p>
                       </div>
                     </div>
                   </div>

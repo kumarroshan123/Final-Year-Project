@@ -10,7 +10,12 @@ const app: Express = express();
 const port = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors()); // Enable CORS (configure origins for production)
+app.use(cors(
+  {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173', // Allow requests from this origin
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  }
+)); // Enable CORS (configure origins for production)
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser());

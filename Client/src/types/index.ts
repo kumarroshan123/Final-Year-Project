@@ -9,6 +9,7 @@ export interface Shop {
   id: string;
   name: string;
   owner: string;
+  storeName: string; // Store/Business name
   address: string;
   phone: string;
   email: string;

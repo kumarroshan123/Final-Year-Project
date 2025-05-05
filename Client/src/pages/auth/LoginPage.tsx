@@ -18,22 +18,11 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
-    // Simulate login API call
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes: simple validation
-      if (email === 'demo@example.com' && password === 'password1122') {
-        login();
-        navigate('/dashboard');
-      } else {
-        setError('Invalid email or password');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('An error occurred during login');
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Invalid email or password');
     } finally {
       setLoading(false);
     }

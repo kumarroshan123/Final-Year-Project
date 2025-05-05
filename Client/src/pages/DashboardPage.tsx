@@ -16,13 +16,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../compone
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { AnalyticsSummary, PredictionSummary } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const DashboardPage: React.FC = () => {
-  // Mock user data for Navbar (replace with actual auth context later)
-  const mockUser = {
-    name: 'Vikram Sharma',
-    shopName: 'Vikram\'s General Store'
-  };
+  const { user } = useAuth();
 
   // Mock data for analytics summary
   const analyticsSummary: AnalyticsSummary = {
@@ -70,7 +67,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar user={mockUser} /> 
+      <Navbar /> 
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
@@ -83,7 +80,7 @@ const DashboardPage: React.FC = () => {
               Dive deep into your business performance metrics.
             </p>
             <p className="text-xl text-center mt-4">
-              {mockUser.shopName}
+              {user?.storeName || 'Your Store Name'}
             </p>
           </div>
         </section>
@@ -304,4 +301,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;

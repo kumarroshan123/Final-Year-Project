@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, MessageSquare, Briefcase, User } from 'lucide-react';
+import { Mail, Phone, Send, MessageSquare, Briefcase, User } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { Card, CardContent } from '../components/ui/Card';
@@ -50,84 +50,7 @@ const ContactPage: React.FC = () => {
         {/* Contact Form Section */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              <div className="space-y-8">
-                <Card>
-                  <CardContent className="p-8">
-                    <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
-                    <div className="space-y-6">
-                      <div className="flex items-start">
-                        <div className="rounded-full bg-blue-100 p-3 mr-4">
-                          <MapPin className="h-6 w-6 text-blue-800" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">Visit Us</h3>
-                          <p className="text-gray-600 mt-1">
-                            27 Ballygunge Circular Road<br />
-                            Ballygunge, Kolkata<br />
-                            West Bengal 700019, India
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start">
-                        <div className="rounded-full bg-emerald-100 p-3 mr-4">
-                          <Phone className="h-6 w-6 text-emerald-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">Call Us</h3>
-                          <p className="text-gray-600 mt-1">
-                            <a href="tel:+1234567890" className="hover:text-blue-800">
-                              +123 456 7890
-                            </a>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Mon-Fri from 9am to 6pm
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start">
-                        <div className="rounded-full bg-blue-100 p-3 mr-4">
-                          <Mail className="h-6 w-6 text-blue-800" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">Email Us</h3>
-                          <p className="text-gray-600 mt-1">
-                            <a href="mailto:info@ledgersense.com" className="hover:text-blue-800">
-                              info@ledgersense.com
-                            </a>
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            We'll respond within 24 hours
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-8">
-                    <h2 className="text-2xl font-bold mb-6">What to Expect</h2>
-                    <div className="space-y-4">
-                      <p className="text-gray-600">
-                        1. Submit your inquiry using the form
-                      </p>
-                      <p className="text-gray-600">
-                        2. Receive a confirmation email immediately
-                      </p>
-                      <p className="text-gray-600">
-                        3. Get a detailed response within 24 hours
-                      </p>
-                      <p className="text-gray-600">
-                        4. Schedule a demo if needed
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">                
               {/* Contact Form */}
               <Card className="h-fit">
                 <CardContent className="p-8">
@@ -224,27 +147,7 @@ const ContactPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Office Location */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <Card>
-              <CardContent className="p-0">
-                <div className="aspect-w-16 aspect-h-9">
-                  <iframe
-                    title="Office Location"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3685.4750724447187!2d88.41474800000001!3d22.476386!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDI4JzM1LjAiTiA4OMKwMjQnNTMuMSJF!5e0!3m2!1sen!2sin!4v1682147521234!5m2!1sen!2sin"
-                    width="100%"
-                    height="450"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+        
       </main>
 
       <Footer />

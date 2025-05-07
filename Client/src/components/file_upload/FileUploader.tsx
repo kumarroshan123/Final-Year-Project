@@ -15,14 +15,10 @@ interface FileWithStatus {
 export default function FileUploader() {
     const [files, setFiles] = useState<FileWithStatus[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    // Mock user data for demonstration purposes
-    const mockUser = { name: "Vikram Sharma" };
 
     const allowedFileTypes = {
-        "application/pdf": [".pdf"],
         "image/png": [".png"],
         "image/jpeg": [".jpg", ".jpeg"],
-        "text/plain": [".txt"],
     };
     // Function to validate the file type and size
     function validateFile(file: File): { isValid: boolean; error?: string } {
@@ -31,7 +27,7 @@ export default function FileUploader() {
         if (!allowedMimeTypes.includes(file.type)) {
             return {
                 isValid: false,
-                error: "Invalid file type. Only PDF, PNG, JPG, and TXT files are allowed.",
+                error: "Invalid file type. Only PNG, JPG, and JPEG files are allowed.",
             };
         }
 
@@ -91,7 +87,7 @@ export default function FileUploader() {
         // Create an array of upload promises
         const uploadPromises = filesToUpload.map(async (fileWithStatus) => {
             const formData = new FormData();
-            formData.append("file", fileWithStatus.file);
+            formData.append("image", fileWithStatus.file); // Changed "file" to "image"
 
             try {
                 setFiles((prev) =>
@@ -103,7 +99,7 @@ export default function FileUploader() {
                 );
 
                 // Replace the URL with your actual upload endpoint
-                await axios.post("https://httpbin.org/post", formData, {
+                const response = await axios.post("http://localhost:5003/ocr", formData, { // Changed URL
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
@@ -137,12 +133,38 @@ export default function FileUploader() {
                             : f
                     )
                 );
-            } catch (error) {
-                console.error("Upload error:", error);
+                console.log("OCR Response:", response.data); // Optional: Log the OCR response
+            } catch (error: unknown) { // Added ': any' to access error properties
+                console.error("Upload error details:", error); // Log the full error object
+
+                let errorMessage = "Upload failed. Please try again.";
+                if (axios.isAxiosError(error)) {
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        console.error("Server Response Data:", error.response.data);
+                        console.error("Server Response Status:", error.response.status);
+                        errorMessage =
+                            error.response.data?.error || // Check for "error" field in response
+                            error.response.data?.message || // Check for "message" field
+                            `Server error: ${error.response.status}`;
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser
+                        console.error("No response received:", error.request);
+                        errorMessage = "Network error or server not reachable. Check browser console (Network tab).";
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        errorMessage = error.message;
+                    }
+                } else if (error instanceof Error) {
+                    errorMessage = error.message;
+                }
+
                 setFiles((prev) =>
                     prev.map((f) =>
                         f.file === fileWithStatus.file
-                            ? { ...f, status: "error" as UploadStatus }
+                            ? { ...f, status: "error" as UploadStatus, error: errorMessage } // Store the detailed error
                             : f
                     )
                 );
@@ -155,7 +177,7 @@ export default function FileUploader() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <Navbar user={mockUser} />
+            <Navbar />
             <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
                 <div className="container mx-auto px-4">
                     <h1 className="text-4xl md:text-5xl font-bold text-center flex items-center justify-center">
@@ -173,7 +195,7 @@ export default function FileUploader() {
                         onChange={handleFileChange}
                         className="hidden"
                         multiple
-                        accept=".pdf,.png,.jpg,.jpeg,.txt"
+                        accept=".png,.jpg,.jpeg" // Updated accept types
                     />
 
                     {/* Custom file input trigger */}
@@ -188,7 +210,7 @@ export default function FileUploader() {
                                     : "Drag and drop your files here"}
                             </span>
                             <span className="text-xs text-gray-500">
-                                PNG, JPG, JPEG only (up to 10MB)
+                                PNG, JPG, JPEG only (up to 10MB) {/* Updated file types text */}
                             </span>
                         </button>
                     </div>
@@ -218,7 +240,7 @@ export default function FileUploader() {
                                 3. Maximum file size is 10MB.
                             </li>
                             <li className="flex items-center text-center justify-center text-sm text-gray-600 ">
-                                4. Supported file types: PNG, JPG, and JPEG.
+                                4. Supported file types: PNG, JPG, and JPEG. {/* Updated file types text */}
                             </li>
                         </ul>
                     </div>

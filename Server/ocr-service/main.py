@@ -1,10 +1,12 @@
 from table_log import result_table_log
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS 
 import numpy as np
 import cv2
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/ocr', methods=['POST'])
 def process_image():
@@ -26,6 +28,7 @@ def process_image():
         
         ocr_result = result_table_log(img)
         result_json = ocr_result.to_json()
+        print("Extracted OCR Data:", result_json)  # Print the extracted data in the console
         if result_json is None or len(result_json) == 0:
             return jsonify({"error": "No text found in the image"}), 400
         

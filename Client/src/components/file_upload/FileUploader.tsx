@@ -451,13 +451,15 @@ export default function FileUploader() {
                                     </tbody>
                                 </table>
                             </div>
-                            <button
-                                onClick={() =>
-                                    console.log("Approved data:", tableData)
-                                }
-                                className="mt-2 px-2 bg-green-600 text-white rounded hover:bg-green-700">
-                                Approve
-                            </button>
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={() =>
+                                        console.log("Approved data:", tableData)
+                                    }
+                                    className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                                    Approve
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

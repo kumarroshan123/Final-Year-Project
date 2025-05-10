@@ -2,6 +2,7 @@ import axios from "axios";
 import { ChangeEvent, useState, useRef } from "react";
 import { FiUploadCloud, FiX } from "react-icons/fi";
 import Navbar from "../layout/Navbar";
+import { toast } from "react-toastify";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 
@@ -12,9 +13,20 @@ interface FileWithStatus {
     error?: string;
 }
 
+interface TableRowData {
+    Item: { [key: string]: string };
+    "Selling Price": { [key: string]: string };
+    Discount: { [key: string]: string };
+    Customer: { [key: string]: string };
+}
+
 export default function FileUploader() {
     const [files, setFiles] = useState<FileWithStatus[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    // state for table data
+    const [tableData, setTableData] = useState<TableRowData | null>(null);
+    // state for table visibility
+    const [showTable, setShowTable] = useState(true);
 
     const allowedFileTypes = {
         "image/png": [".png"],
@@ -70,6 +82,10 @@ export default function FileUploader() {
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
+        // Clear table data if all files are being removed
+        if (files.length <= 1) {
+            setTableData(null);
+        }
     }
     // Function to dismiss all selected files
     function dismissAllFiles() {
@@ -77,7 +93,66 @@ export default function FileUploader() {
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
+        setTableData(null);
     }
+    // Function to convert the OCR response to table data
+    const getTableRows = () => {
+        if (!tableData) return [];
+
+        const rowCount = Object.values(tableData)[0];
+        const rows = [];
+
+        for (let i = 0; i < Object.keys(rowCount).length; i++) {
+            const row: { [key: string]: string } = {};
+            Object.keys(tableData).forEach((column) => {
+                row[column] = tableData[column as keyof TableRowData][i] || "";
+            });
+            rows.push(row);
+        }
+        return rows;
+    };
+    // Handler for editing table cells
+    function handleTableEdit(rowIdx: number, column: string, value: string) {
+        if (!tableData) return;
+        console.log(tableData);
+
+        setTableData((prev) => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                [column]: {
+                    ...prev[column as keyof TableRowData],
+                    [rowIdx]: value,
+                },
+            };
+        });
+        console.log(tableData);
+    }
+    // Handles the approve function
+    const handleApprove = () => {
+        if (tableData) {
+            console.log("Approved data: ", tableData);
+            toast.success("Data has been successfully added!", {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+            setShowTable(false);
+            // Dismiss all files after approve
+            setFiles([]);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            // Clear table data after animation
+            setTimeout(() => {
+                setTableData(null);
+                setShowTable(true);
+            }, 500);
+        }
+    };
     // Function to handle file upload
     // This function will upload files that are in 'idle' status
     async function handleFileUpload() {
@@ -99,28 +174,33 @@ export default function FileUploader() {
                 );
 
                 // Replace the URL with your actual upload endpoint
-                const response = await axios.post("http://localhost:5003/ocr", formData, { // Changed URL
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    onUploadProgress: (progressEvent) => {
-                        // Calculate the progress percentage
-                        const progress = progressEvent.total
-                            ? Math.round(
-                                  (progressEvent.loaded * 100) /
-                                      progressEvent.total
-                              )
-                            : 0;
+                const response = await axios.post(
+                    "http://localhost:5003/ocr",
+                    formData,
+                    {
+                        // Changed URL
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                        onUploadProgress: (progressEvent) => {
+                            // Calculate the progress percentage
+                            const progress = progressEvent.total
+                                ? Math.round(
+                                      (progressEvent.loaded * 100) /
+                                          progressEvent.total
+                                  )
+                                : 0;
 
-                        setFiles((prev) =>
-                            prev.map((f) =>
-                                f.file === fileWithStatus.file
-                                    ? { ...f, progress }
-                                    : f
-                            )
-                        );
-                    },
-                });
+                            setFiles((prev) =>
+                                prev.map((f) =>
+                                    f.file === fileWithStatus.file
+                                        ? { ...f, progress }
+                                        : f
+                                )
+                            );
+                        },
+                    }
+                );
 
                 setFiles((prev) =>
                     prev.map((f) =>
@@ -134,7 +214,10 @@ export default function FileUploader() {
                     )
                 );
                 console.log("OCR Response:", response.data); // Optional: Log the OCR response
-            } catch (error: unknown) { // Added ': any' to access error properties
+                setTableData(response.data);
+                console.log(tableData);
+            } catch (error: unknown) {
+                // Added ': any' to access error properties
                 console.error("Upload error details:", error); // Log the full error object
 
                 let errorMessage = "Upload failed. Please try again.";
@@ -142,8 +225,14 @@ export default function FileUploader() {
                     if (error.response) {
                         // The request was made and the server responded with a status code
                         // that falls out of the range of 2xx
-                        console.error("Server Response Data:", error.response.data);
-                        console.error("Server Response Status:", error.response.status);
+                        console.error(
+                            "Server Response Data:",
+                            error.response.data
+                        );
+                        console.error(
+                            "Server Response Status:",
+                            error.response.status
+                        );
                         errorMessage =
                             error.response.data?.error || // Check for "error" field in response
                             error.response.data?.message || // Check for "message" field
@@ -152,7 +241,8 @@ export default function FileUploader() {
                         // The request was made but no response was received
                         // `error.request` is an instance of XMLHttpRequest in the browser
                         console.error("No response received:", error.request);
-                        errorMessage = "Network error or server not reachable. Check browser console (Network tab).";
+                        errorMessage =
+                            "Network error or server not reachable. Check browser console (Network tab).";
                     } else {
                         // Something happened in setting up the request that triggered an Error
                         errorMessage = error.message;
@@ -164,7 +254,11 @@ export default function FileUploader() {
                 setFiles((prev) =>
                     prev.map((f) =>
                         f.file === fileWithStatus.file
-                            ? { ...f, status: "error" as UploadStatus, error: errorMessage } // Store the detailed error
+                            ? {
+                                  ...f,
+                                  status: "error" as UploadStatus,
+                                  error: errorMessage,
+                              } // Store the detailed error
                             : f
                     )
                 );
@@ -210,7 +304,8 @@ export default function FileUploader() {
                                     : "Drag and drop your files here"}
                             </span>
                             <span className="text-xs text-gray-500">
-                                PNG, JPG, JPEG only (up to 10MB) {/* Updated file types text */}
+                                PNG, JPG, JPEG only (up to 10MB){" "}
+                                {/* Updated file types text */}
                             </span>
                         </button>
                     </div>
@@ -240,7 +335,8 @@ export default function FileUploader() {
                                 3. Maximum file size is 10MB.
                             </li>
                             <li className="flex items-center text-center justify-center text-sm text-gray-600 ">
-                                4. Supported file types: PNG, JPG, and JPEG. {/* Updated file types text */}
+                                4. Supported file types: PNG, JPG, and JPEG.{" "}
+                                {/* Updated file types text */}
                             </li>
                         </ul>
                     </div>
@@ -331,6 +427,67 @@ export default function FileUploader() {
                                 Files
                             </button>
                         )}
+
+                    {/* Displaying the table */}
+                    {tableData && showTable && (
+                        <div className="mt-6">
+                            <div
+                                className={`transition-all duration-500 ease-in-out ${
+                                    tableData
+                                        ? "opacity-100 max-h-[500px]"
+                                        : "opacity-0 max-h-0 overflow-hidden"
+                                }`}>
+                                <table className="min-w-full border border-gray-300 mb-2">
+                                    <thead>
+                                        <tr>
+                                            {Object.keys(tableData).map(
+                                                (column) => (
+                                                    <th
+                                                        key={column}
+                                                        className="border px-2 py-1 bg-gray-100 text-xs">
+                                                        {column}
+                                                    </th>
+                                                )
+                                            )}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {getTableRows().map((row, rowIdx) => (
+                                            <tr key={rowIdx}>
+                                                {Object.entries(row).map(
+                                                    ([column, value]) => (
+                                                        <td
+                                                            key={column}
+                                                            className="border px-2 py-1">
+                                                            <input
+                                                                className="w-full border rounded px-1 py-0.5 text-xs"
+                                                                value={value}
+                                                                onChange={(e) =>
+                                                                    handleTableEdit(
+                                                                        rowIdx,
+                                                                        column,
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                            />
+                                                        </td>
+                                                    )
+                                                )}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={handleApprove}
+                                    className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                                    Approve
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>

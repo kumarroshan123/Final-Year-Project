@@ -31,15 +31,13 @@ def process_image():
         print("Extracted OCR Data:", result_json)  # Print the extracted data in the console
         if result_json is None or len(result_json) == 0:
             return jsonify({"error": "No text found in the image"}), 400
-        
-        result = {
-            "message": "Image received successfully",
-            "filename": image_file.filename,
-            "image_shape": img.shape,
-            "detected_text": result_json
-        }
-
-        return jsonify(result), 200
+        # result = {
+        #     "message": "Image received successfully",
+        #     "filename": image_file.filename,
+        #     "image_shape": img.shape,
+        #     "detected_text": result_json
+        # }
+        return result_json, 200
     
     except Exception as e:
         print(f"Error processing image: {e}")

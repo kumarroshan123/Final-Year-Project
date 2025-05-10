@@ -2,6 +2,7 @@ import axios from "axios";
 import { ChangeEvent, useState, useRef } from "react";
 import { FiUploadCloud, FiX } from "react-icons/fi";
 import Navbar from "../layout/Navbar";
+import { toast } from "react-toastify";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 
@@ -24,6 +25,8 @@ export default function FileUploader() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     // state for table data
     const [tableData, setTableData] = useState<TableRowData | null>(null);
+    // state for table visibility
+    const [showTable, setShowTable] = useState(true);
 
     const allowedFileTypes = {
         "image/png": [".png"],
@@ -125,6 +128,31 @@ export default function FileUploader() {
         });
         console.log(tableData);
     }
+    // Handles the approve function
+    const handleApprove = () => {
+        if (tableData) {
+            console.log("Approved data: ", tableData);
+            toast.success("Data has been successfully added!", {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+            setShowTable(false);
+            // Dismiss all files after approve
+            setFiles([]);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            // Clear table data after animation
+            setTimeout(() => {
+                setTableData(null);
+                setShowTable(true);
+            }, 500);
+        }
+    };
     // Function to handle file upload
     // This function will upload files that are in 'idle' status
     async function handleFileUpload() {
@@ -401,7 +429,7 @@ export default function FileUploader() {
                         )}
 
                     {/* Displaying the table */}
-                    {tableData && (
+                    {tableData && showTable && (
                         <div className="mt-6">
                             <div
                                 className={`transition-all duration-500 ease-in-out ${
@@ -453,9 +481,7 @@ export default function FileUploader() {
                             </div>
                             <div className="flex justify-end">
                                 <button
-                                    onClick={() =>
-                                        console.log("Approved data:", tableData)
-                                    }
+                                    onClick={handleApprove}
                                     className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
                                     Approve
                                 </button>

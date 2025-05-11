@@ -29,14 +29,13 @@ export const protect:AsyncHandler = async (req: AuthenticatedRequest, res: Respo
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     // Fetch user from DB
-    const currentUser = await User.findByPk(decoded.id);
-    if (!currentUser) {
-      return res.status(401).json({ message: 'User no longer exists.' });
+     if (!req.user) {
+      const user = await User.findByPk(decoded.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      req.user = user;
     }
-
-    // Attach user to request
-    req.user = currentUser;
-    console.log('User attached to request:', req.user);
     next();
   } catch (err) {
     console.error('Auth Middleware Error:', err);

@@ -4,6 +4,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { sequelize } from '../models';
 import authRoutes from './routes/authRoutes';
+import transactionRoutes from './routes/transactionRoutes';
 import cookieParser from 'cookie-parser';
 
 const app: Express = express();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Test Database Connection using the imported sequelize instance
 const checkDbConnection = async () => {

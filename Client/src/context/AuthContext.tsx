@@ -12,7 +12,7 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -46,8 +46,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await authApi.login({ email, password });
-      await refreshUser();
+      const res=await authApi.login({ email, password });
+      setUser(res.data.user);
+      setIsAuthenticated(true);
     } finally {
       setLoading(false);
     }
@@ -56,8 +57,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (name: string, email: string, password: string) => {
     setLoading(true);
     try {
-      await authApi.register({ name, email, password });
-      await refreshUser();
+      const res=await authApi.register({ name, email, password });
+      setUser(res.data.user);
+      setIsAuthenticated(true);
     } finally {
       setLoading(false);
     }
@@ -88,3 +90,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+

@@ -5,6 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { TrendingUp, PackageCheck, Users, BarChart, Lightbulb, BadgeIndianRupee } from 'lucide-react';
 import Badge from '../components/ui/Badge';
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+
 // Define types for the prediction data
 type SalesForecast = { period: string; forecastValue: number; confidence: number };
 type InventoryRecommendation = { item: string; currentStock: number; recommendedStock: number; potentialSaving: number };
@@ -38,7 +61,7 @@ const marketTrendsData: MarketTrend[] = [
 ];
 
 const PredictionsPage: React.FC = () => {
-  
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -47,16 +70,42 @@ const PredictionsPage: React.FC = () => {
       maximumFractionDigits: 0
     }).format(amount);
   };
+  const salesChartData = {
+    labels: salesForecastData.map(d => d.period),
+    datasets: [
+      {
+        label: 'Forecasted Sales',
+        data: salesForecastData.map(d => d.forecastValue),
+        borderColor: 'rgba(34,197,94,1)',
+        backgroundColor: 'rgba(34,197,94,0.2)',
+        tension: 0.4,
+      },
+    ],
+  };
+
+  const salesChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar  />
+      <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center flex items-center justify-center">
-               Predictions Dashboard
+              Predictions Dashboard
             </h1>
             <p className="text-xl text-center max-w-3xl mx-auto text-indigo-100">
               Explore forecasts and recommendations for your business growth.
@@ -77,9 +126,10 @@ const PredictionsPage: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-gray-100 p-6 rounded-lg h-48 flex items-center justify-center mb-6">
-                  <p className="text-gray-500">[Sales Forecast Line Chart Placeholder]</p>
+                <div className="bg-gray-100 p-4 rounded-lg h-60 md:h-72 lg:h-80 mb-6">
+                  <Line data={salesChartData} options={salesChartOptions} />
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {salesForecastData.map(forecast => (
                     <div key={forecast.period} className="bg-green-50 p-4 rounded-lg shadow-sm border border-green-100">
@@ -119,7 +169,7 @@ const PredictionsPage: React.FC = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{rec.currentStock} units</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-medium">{rec.recommendedStock} units</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium flex items-center">
-                             <BadgeIndianRupee className="h-4 w-4 mr-1" /> {formatCurrency(rec.potentialSaving)}
+                            <BadgeIndianRupee className="h-4 w-4 mr-1" /> {formatCurrency(rec.potentialSaving)}
                           </td>
                         </tr>
                       ))}
@@ -167,7 +217,7 @@ const PredictionsPage: React.FC = () => {
                 {marketTrendsData.map((trend, index) => (
                   <div key={index} className="flex items-start p-4 border rounded-lg bg-amber-50">
                     <div className="flex-shrink-0 mr-3">
-                      <Badge 
+                      <Badge
                         variant={trend.impact === 'Positive' ? 'success' : trend.impact === 'Negative' ? 'error' : 'info'}
                         className="capitalize"
                       >

@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import re
 import matplotlib.pyplot as plt
 import cv2
 from paddleocr import PaddleOCR
@@ -94,6 +95,26 @@ def extract_table(ocr_engine, gray, horizontal_lines, vertical_lines):
 
     return clean_table_data(table_data)
 
+def clean_cell(x):
+    if isinstance(x, (list, tuple)) or hasattr(x, 'tolist'):
+        try:
+            x = x[0]
+        except Exception:
+            pass
+    s = str(x).strip()
+    if s.startswith('[') and s.endswith(']'):
+        s = s[1:-1].strip()
+    return s
+
+def is_stopword(s):
+    if not s:
+        return True
+    if s in {'-', '--'}:
+        return True
+    if re.search(r'Invalid', s, re.IGNORECASE):
+        return True
+    return False
+
 def clean_table_data(table_data):
     if table_data:
         df = pd.DataFrame(table_data)
@@ -107,20 +128,28 @@ def clean_table_data(table_data):
     else:
         return pd.DataFrame()
     
-    unwanted_values = ["[Invalid ROI]", "[Invalid Coords]", "[OCR Error]", ""]
+    df_cleaned = df.applymap(clean_cell)
 
-    mask_cols = df.apply(lambda col: all(value in unwanted_values for value in col.astype(str)), axis=0)
-    mask_rows = df.apply(lambda row: all(value in unwanted_values for value in row.astype(str)), axis=1)
+    mask = df_cleaned.applymap(is_stopword)
+
+    keep_cols = ~mask.all(axis=0)
+    df_cleaned = df_cleaned.loc[:, keep_cols]
     
-    cols_to_keep = mask_cols[~mask_cols].index
-    df_cleaned_cols = df[cols_to_keep].copy()
+    keep_rows = ~mask.all(axis=1)
+    df_cleaned = df_cleaned.loc[keep_rows, :]
 
-    df_cleaned = df_cleaned_cols[~mask_rows].copy()
+    df_cleaned.reset_index(drop=True, inplace=True)
     
     df_header = df_cleaned.iloc[0]
     df_res = df_cleaned[1:].copy()
     df_res.columns = df_header
-    return df_res.reset_index(drop=True)
+    df_res = df_res.reset_index(drop=True)
+
+    df_res['OrderID'] = df_res['OrderID'].replace(r'^\s*$', np.nan, regex=True)
+    df_res['OrderID'] = df_res['OrderID'].ffill()
+    # df_res['OrderID'] = df_res['OrderID'].astype(int)
+
+    return df_res
 
 def result_table_log(img):
     ocr_engine = config_ocr_engine()

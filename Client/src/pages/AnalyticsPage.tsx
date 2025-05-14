@@ -4,6 +4,20 @@ import Footer from '../components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { BarChart, DollarSign, Users, Package, Percent, LineChart } from 'lucide-react'; // Removed TrendingUp
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+
+
 // Define types for the analytics data
 type MonthlySales = { month: string; sales: number; profit: number };
 type CustomerSegment = { segment: string; count: number; averageSpend: number };
@@ -41,7 +55,7 @@ const inventoryPerformanceData: InventoryItem[] = [
 
 
 const AnalyticsPage: React.FC = () => {
-  
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -51,15 +65,64 @@ const AnalyticsPage: React.FC = () => {
     }).format(amount);
   };
 
+
+  const salesChartData = {
+    labels: monthlySalesData.map(item => item.month),
+    datasets: [
+      {
+        label: 'Sales',
+        data: monthlySalesData.map(item => item.sales),
+        backgroundColor: 'rgba(59, 130, 246, 0.7)', // Blue-500
+      },
+      {
+        label: 'Profit',
+        data: monthlySalesData.map(item => item.profit),
+        backgroundColor: 'rgba(16, 185, 129, 0.7)', // Emerald-500
+      },
+    ],
+  };
+
+
+
+
+  const customerPieData = {
+    labels: customerSegmentsData.map(segment => segment.segment),
+    datasets: [
+      {
+        label: 'Customer Count',
+        data: customerSegmentsData.map(segment => segment.count),
+        backgroundColor: ['#6366F1', '#60A5FA', '#34D399'], // indigo, blue, emerald
+      },
+    ],
+  };
+
+  const salesChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
+    },
+  };
+
+  const customerPieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' as const },
+    },
+  };
+
+
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar  />
+      <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-800 to-emerald-600 text-white py-8">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center flex items-center justify-center">
-               Analytics Dashboard
+              Analytics Dashboard
             </h1>
             <p className="text-xl text-center max-w-3xl mx-auto text-blue-100">
               In-depth analysis of your business operations and performance.
@@ -125,8 +188,8 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {/* Placeholder for Bar Chart */}
-                <div className="bg-gray-100 p-6 rounded-lg h-64 flex items-center justify-center">
-                  <p className="text-gray-500">[Monthly Sales & Profit Bar Chart Placeholder]</p>
+                <div className="bg-white p-4 rounded-lg h-64">
+                  <Bar data={salesChartData} options={salesChartOptions} />
                 </div>
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
                   {monthlySalesData.map(data => (
@@ -149,8 +212,8 @@ const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {/* Placeholder for Pie Chart */}
-                <div className="bg-gray-100 p-6 rounded-lg h-48 flex items-center justify-center mb-4">
-                  <p className="text-gray-500">[Customer Segment Pie Chart Placeholder]</p>
+                <div className="bg-white p-4 rounded-lg h-60">
+                  <Pie data={customerPieData} options={customerPieOptions} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {customerSegmentsData.map(segment => (
@@ -161,6 +224,7 @@ const AnalyticsPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
+
               </CardContent>
             </Card>
 

@@ -29,7 +29,7 @@ def process_image():
         ocr_result = result_table_log(img)
         result_json = ocr_result.to_json()
         print("Extracted OCR Data:", result_json)  # Print the extracted data in the console
-        if result_json is None or len(result_json) == 0:
+        if result_json is None or result_json == '{}' or len(result_json) == 0:
             return jsonify({"error": "No text found in the image"}), 400
         # result = {
         #     "message": "Image received successfully",

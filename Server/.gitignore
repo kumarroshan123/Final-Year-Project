@@ -35,3 +35,12 @@ Thumbs.db
 
 # Misc
 *.tgz
+
+ocr_service
+.ocr_service
+analytics_service
+.analytics_service
+*.pyc
+__pycache__/
+*.pyo\
+*.log
